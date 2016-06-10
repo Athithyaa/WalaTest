@@ -45,14 +45,6 @@ be analysed
 2. The algorithm then iterates over the blocks(Graph traversal) and evaluates them.
 3. Evaluation rules can be found out from the references.
 
-## TO:DO:
-
-1. Program only works for fairly simple conditional constructs (simple if statements).
-2. Loops have not been handled.
-3. Conditional statements with complicated expressions have not been handled.
-4. Instruction evaluation is not exhaustive.
-
-
 ## Simple Demonstration:
 The SampleProgram.jar contains the following classes:
 
@@ -95,3 +87,11 @@ The SampleProgram.jar contains the following classes:
 
 *Variables after propagation: {b=10, a=15, z=3}*
 meaning that at the end of method *fun*, "a" has value "15", "b" has value "10" and "z" has value "3". 
+
+
+## TO:DO:
+
+1. Program only works for fairly simple conditional constructs (simple if statements).
+2. Loops have not been handled.
+3. Conditional statements with complicated expressions have not been handled.
+4. Instruction evaluation is not exhaustive.
