@@ -28,13 +28,13 @@ Once the project is built compile the java classes (ConstantPropagation, Main an
 
 Program can be executed by:
 
-*java Main "<jarfilename>" "<methodsignature>" "<graphviz>"*
+*java Main "jarfilename" "methodsignature" "graphviz"*
 
 where the arguments are:
 
-1. *<jarfilename>* name of the jar file to analyze
-2. *<methodsignature>* name of the method to analyze. Example: *Program.fun(I)V*, represents the method void fun(int) in class Program.
-3. *<grahviz>* either true of false. True for generating a pdf file("out.pdf") consisting of the Control Flow Graph. False otherwise.
+1. *jarfilename* name of the jar file to analyze
+2. *methodsignature* name of the method to analyze. Example: *Program.fun(I)V*, represents the method void fun(int) in class Program.
+3. *grahviz* either true of false. True for generating a pdf file("out.pdf") consisting of the Control Flow Graph. False otherwise.
 
 
 ## Algorithm for Constant propagation
