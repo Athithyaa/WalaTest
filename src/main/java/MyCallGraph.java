@@ -25,8 +25,10 @@ import java.io.File;
  * Created by Athithyaa on 05-06-2016.
  */
 public class MyCallGraph {
-    private static final String dot_exe = "C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe";
-    private static final String pdf_exe = "C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroRd32.exe";
+    //private static final String dot_exe = "C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe";
+    private static final String dot_exe = "dot";
+    //private static final String pdf_exe = "C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroRd32.exe";
+
     private IR intermediateRep;
 
     public MyCallGraph(String exclusionFileName,String jarFileName,String methodRef){
