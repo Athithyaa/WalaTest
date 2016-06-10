@@ -51,4 +51,47 @@ be analysed
 2. Loops have not been handled.
 3. Conditional statements with complicated expressions have not been handled.
 4. Instruction evaluation is not exhaustive.
- 
+
+
+## Simple Demonstration:
+The SampleProgram.jar contains the following classes:
+
+1. SampleProgramDriver - simple driver program to invoke a method in a different class
+ ~~~~
+    public class SampleProgramDriver {
+    
+        public static void main(String[] arg){
+            Program program = new Program();
+            program.fun(3);
+        }
+    }
+ ~~~~
+2. Program - class where the function *fun* resides. The program without any user input analyzes method *fun* by default.
+ ~~~~
+    public class Program {
+        public Program(){
+    
+        }
+    
+        public void fun(int x){ // keep z as an argument
+            int a=5,b=10,z=7; // keep z as a constant
+            if(a==5){
+                a=10;
+                z=1;
+                if(a==10){
+                    a=15;
+                    z=3;
+                }else{
+                    a=12;
+                    z=4;
+                }
+            }else{
+                a=x+3;
+            }
+        }
+    }
+ ~~~~
+3. Sample run the program gives the following output:
+
+*Variables after propagation: {b=10, a=15, z=3}*
+meaning that at the end of method *fun*, "a" has value "15", "b" has value "10" and "z" has value "3". 
