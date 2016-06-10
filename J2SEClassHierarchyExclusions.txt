@@ -1,0 +1,10 @@
+com\/sun\/.*
+sun\/.*
+javax\/swing\/.*
+sun\/awt\/.*
+sun\/swing\/.*
+java\/awt\/.*
+javafx\/.*
+javax\/.*
+com\/apple\/.*
+org\/omg\/.*

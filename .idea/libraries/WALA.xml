@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="WALA">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Documents/GitHub/WALA/com.ibm.wala.cast.java.test.data/META-INF/.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
