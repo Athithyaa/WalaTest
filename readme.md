@@ -4,6 +4,7 @@
 
 This code repository implements constant propagation using the [WALA](http://wala.sourceforge.net/wiki/index.php/Main_Page) framework for
 program analysis. Here are some reference for constant propagation:
+
 1. [UCR](http://www.cs.ucr.edu/~gupta/teaching/201-14/Papers/const.pdf)
 2. [Tel Aviv University](http://www.cs.tau.ac.il/~msagiv/courses/pa07/lecture2-notes-update.pdf) 
 
@@ -14,6 +15,7 @@ This project uses Maven. Dependencies can be found here [pom.xml](pom.xml)
 
 ## Building and Execution
 The following files are important for the functioning of the WALA framework:
+
 1. J2SEClassHierarchyExclusions.txt
 2. primordial.txt
 3. primordial.jar.model
@@ -29,6 +31,7 @@ Program can be executed by:
 *java Main "<jarfilename>" "<methodsignature>" "<graphviz>"*
 
 where the arguments are:
+
 1. *<jarfilename>* name of the jar file to analyze
 2. *<methodsignature>* name of the method to analyze. Example: *Program.fun(I)V*, represents the method void fun(int) in class Program.
 3. *<grahviz>* either true of false. True for generating a pdf file("out.pdf") consisting of the Control Flow Graph. False otherwise.
@@ -36,12 +39,14 @@ where the arguments are:
 
 ## Algorithm for Constant propagation
 Brief overview of the algorithm:
+
 1. Using the WALA framework a Shrike Control Flow Graph is generated consisting of Blocks. Each block represents part of the program to
 be analysed
 2. The algorithm then iterates over the blocks(Graph traversal) and evaluates them.
 3. Evaluation rules can be found out from the references.
 
 ## TO:DO:
+
 1. Program only works for fairly simple conditional constructs (simple if statements).
 2. Loops have not been handled.
 3. Conditional statements with complicated expressions have not been handled.
