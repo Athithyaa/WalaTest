@@ -49,22 +49,35 @@ public class ConstantPropagation {
         HashMap<String,String> var2 = varList[1];
         HashMap<String,String> union = new HashMap<>();
 
-        for(String s : var1.keySet()){
+        Set<String> kS;
+        if(var1.keySet().size() > var2.keySet().size()){
+            kS = var1.keySet();
+        }else{
+            kS = var2.keySet();
+        }
+
+        for(String s : kS){
             String val1 = var1.get(s);
             String val2 = var2.get(s);
+            if(val1==null){
+                val1="Top";
+            }
+            if(val2==null){
+                val2="Top";
+            }
             String valNew;
             if(val1.equals(val2)){
                 valNew = val1;
             }else if(val1.equals("Bottom")){
-                valNew = "Bottom";
-            }else if (val2.equals("Bottom")){
-                valNew = "Bottom";
-            }else if(val1.equals("Top")){
                 valNew = val2;
-            }else if(val2.equals("Top")){
+            }else if (val2.equals("Bottom")){
                 valNew = val1;
+            }else if(val1.equals("Top")){
+                valNew = "Top";
+            }else if(val2.equals("Top")){
+                valNew = "Top";
             }else{
-                valNew = "Bottom";
+                valNew = "Top";
             }
             union.put(s,valNew);
         }
@@ -79,10 +92,25 @@ public class ConstantPropagation {
             for (int i = next.getFirstInstructionIndex(); i <= next.getLastInstructionIndex(); i++) {
                 //System.out.println(i + " " + instrSet[i].toString());
                 if (instrSet[i] instanceof StoreInstruction) {
-                    if (instrSet[i - 1] instanceof ConstantInstruction) {
-                        String cVal = extractConstant(instrSet[i-1]);
-                        String varName = extractVarName(instrSet[i],i);
-                        variables.put(varName, cVal);
+                        if(instrSet[i-1] instanceof ConstantInstruction ||
+                            instrSet[i-1] instanceof LoadInstruction) {
+                        String val;
+                        try {
+                            val = extractConstant(instrSet[i - 1]);
+                        } catch (Exception ex) {
+                            val = extractVarName(instrSet[i - 1], i);
+                            if (variables.get(val) == null) {
+                                variables.put(val, "Top");
+                            }
+                        }
+
+                        String varName = extractVarName(instrSet[i], i);
+                        try {
+                            Double.parseDouble(val);
+                            variables.put(varName, val);
+                        } catch (Exception ex) {
+                            variables.put(varName, variables.get(val));
+                        }
                     }
                 } else if(instrSet[i] instanceof BinaryOpInstruction){
                     String strVal1;
@@ -91,7 +119,7 @@ public class ConstantPropagation {
                     }catch (Exception ex){
                         strVal1 = extractVarName(instrSet[i-1],i);
                         if(variables.get(strVal1)==null){
-                            variables.put(strVal1,"Bottom");
+                            variables.put(strVal1,"Top");
                         }
                     }
 
@@ -101,7 +129,7 @@ public class ConstantPropagation {
                     }catch(Exception ex){
                         strVal2 = extractVarName(instrSet[i-2],i);
                         if(variables.get(strVal2)==null){
-                            variables.put(strVal2,"Bottom");
+                            variables.put(strVal2,"Top");
                         }
                     }
 
@@ -109,10 +137,10 @@ public class ConstantPropagation {
                     String storeName = extractVarName(instrSet[i+1],i);
 
                     if((variables.get(strVal1)!=null &&
-                            variables.get(strVal1).equals("Bottom"))||
+                            variables.get(strVal1).equals("Top"))||
                             (variables.get(strVal2)!=null &&
-                                    variables.get(strVal2).equals("Bottom"))) {
-                        variables.put(storeName,"Bottom");
+                                    variables.get(strVal2).equals("Top"))) {
+                        variables.put(storeName,"Top");
                     }else{
                         double val1;
                         try {
@@ -141,7 +169,7 @@ public class ConstantPropagation {
                     }catch (Exception ex) {
                         strVal1 = extractVarName(instrSet[i - 1], i);
                         if(variables.get(strVal1) == null){ // meaning that the variable is not initialized
-                            variables.put(strVal1,"Bottom");
+                            variables.put(strVal1,"Top");
                         }
                     }
 
@@ -151,18 +179,18 @@ public class ConstantPropagation {
                     }catch (Exception ex){
                         strVal2 = extractVarName(instrSet[i - 2],i);
                         if(variables.get(strVal2) == null){ // meaning that the variable is not initialized
-                            variables.put(strVal2,"Bottom");
+                            variables.put(strVal2,"Top");
                         }
                     }
 
                     if(variables.get(strVal2)!=null){
-                        if(variables.get(strVal2).equals("Bottom")) {
+                        if(variables.get(strVal2).equals("Top")) {
                             condFlag = 1;
                         }
                     }
 
                     if(variables.get(strVal1)!=null){
-                        if(variables.get(strVal1).equals("Bottom")) {
+                        if(variables.get(strVal1).equals("Top")) {
                             condFlag = 1;
                         }
                     }
@@ -187,27 +215,27 @@ public class ConstantPropagation {
                         int flag=0;
                         ShrikeCFG.BasicBlock[] bbList = new ShrikeCFG.BasicBlock[1];
                         if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.NE)) {
-                            if(val1!=val2){
+                            if(val2!=val1){
                                 flag=1;
                             }
                         } else if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.EQ)) {
-                            if(val1==val2){
+                            if(val2==val1){
                                 flag=1;
                             }
                         } else if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.GE)) {
-                            if(val1>=val2){
+                            if(val2>=val1){
                                 flag=1;
                             }
                         } else if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.GT)) {
-                            if(val1>val2){
+                            if(val2>val1){
                                 flag=1;
                             }
                         } else if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.LE)) {
-                            if(val1<=val2){
+                            if(val2<=val1){
                                 flag=1;
                             }
                         } else if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.LT)) {
-                            if(val1<val2){
+                            if(val2<val1){
                                 flag=1;
                             }
                         }
@@ -252,6 +280,7 @@ public class ConstantPropagation {
         Queue<ShrikeCFG.BasicBlock> bbQueue = new LinkedList<>();
         HashMap<ShrikeCFG.BasicBlock,HashMap<String,String>> bVarMap = new HashMap<>();
         HashMap<ShrikeCFG.BasicBlock,List<ShrikeCFG.BasicBlock>> edgeExclMap = new HashMap<>();
+        HashMap<String,String> dupCheck=null;
 
         bbQueue.add(firstBB);
 
@@ -312,6 +341,20 @@ public class ConstantPropagation {
                         List<ShrikeCFG.BasicBlock> adjList = new ArrayList<>();
                         adjList.add(b);
                         edgeExclMap.put(bbItem,adjList);
+                    }
+                }
+            }
+
+
+            if(bbItem.isExitBlock()){
+                if(dupCheck==null){
+                    dupCheck = new HashMap<>();
+                    dupCheck.putAll(variables);
+                }else{
+                    if(dupCheck.equals(variables)){
+                        break;
+                    }else{
+                        dupCheck.putAll(variables);
                     }
                 }
             }

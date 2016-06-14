@@ -116,11 +116,11 @@ public class ConstantPropagationTest {
         vars[1].put("c","Top");
         HashMap<String,String> result = cp.perfomUnion(vars);
 
-        assertEquals("a should have Bottom",result.get("a"),"Bottom");
+        assertEquals("a should have Bottom",result.get("a"),"Top");
         assertEquals("b should have 10",result.get("b"),"10");
         assertEquals("z should have 7",result.get("z"),"7");
-        assertEquals("x should have Bottom",result.get("x"),"Bottom");
-        assertEquals("c should have 7",result.get("c"),"2");
+        assertEquals("x should have Bottom",result.get("x"),"2");
+        assertEquals("c should have 7",result.get("c"),"Top");
     }
 
     @Test
