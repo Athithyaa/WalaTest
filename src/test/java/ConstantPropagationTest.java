@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class ConstantPropagationTest {
 
-    @Test
+   @Test
     public void constantShouldBeExtracted(){
         String obtainedVal="";
         ConstantInstruction testConstInstr = new ConstantInstruction((short) 10) {
@@ -81,18 +81,26 @@ public class ConstantPropagationTest {
         cp.extractConstant(instr);
     }
 
-    @Test
+   @Test
     public void evaluateShouldEvaluateStatementsProperly() {
         ConstantPropagation cp = new ConstantPropagation();
         ShrikeCFG cfg = cp.getCfg();
-        ShrikeCFG.BasicBlock bb = cfg.getNode(1);
+        ShrikeCFG.BasicBlock bb1 = cfg.getNode(1);
+        ShrikeCFG.BasicBlock bb2 = cfg.getNode(2);
+        Edge e12 = new Edge(bb1,bb2);
+
         HashMap<String,String> variables = new HashMap<>();
-        cp.evaluate(bb,variables);
+        cp.evaluate(e12,variables);
+
         assertEquals("a should have 5",variables.get("a"),"5");
         assertEquals("b should have 10",variables.get("b"),"10");
         assertEquals("z should have 7",variables.get("z"),"7");
-        ShrikeCFG.BasicBlock bb1 = cfg.getNode(2);
-        cp.evaluate(bb1,variables);
+
+        ShrikeCFG.BasicBlock dbb2 = cfg.getNode(2);
+        ShrikeCFG.BasicBlock bb3 = cfg.getNode(3);
+        Edge e23 = new Edge(dbb2,bb3);
+
+        cp.evaluate(e23,variables);
         assertEquals("a should have 10",variables.get("a"),"10");
         assertEquals("b should have 10",variables.get("b"),"10");
         assertEquals("z should have 1",variables.get("z"),"1");
@@ -126,10 +134,32 @@ public class ConstantPropagationTest {
     @Test
     public void performPropagate(){
         ConstantPropagation cp = new ConstantPropagation();
-        HashMap<String,String> variables = cp.propagate();
-        assertEquals("a should have Bottom",variables.get("a"),"15");
-        assertEquals("b should have 10",variables.get("b"),"10");
-        assertEquals("z should have 7",variables.get("z"),"3");
-        assertEquals("x should have Bottom",variables.get("x"),null);
+        HashMap<Edge,HashMap<String,String>> variables = cp.propagate();
+        ShrikeCFG cfg = cp.getCfg();
+
+        ShrikeCFG.BasicBlock bb0 = cfg.getNode(0);
+        ShrikeCFG.BasicBlock bb1 = cfg.getNode(1);
+        Edge e01 = new Edge(bb0,bb1);
+        HashMap<String,String> vars01 = new HashMap<>();
+
+        ShrikeCFG.BasicBlock dbb1 = cfg.getNode(1);
+        ShrikeCFG.BasicBlock bb2 = cfg.getNode(2);
+        Edge e12 = new Edge(dbb1,bb2);
+        HashMap<String,String> vars12 = new HashMap<>();
+        vars12.put("b","10");
+        vars12.put("a","5");
+        vars12.put("z","7");
+
+        ShrikeCFG.BasicBlock bb3 = cfg.getNode(3);
+        ShrikeCFG.BasicBlock bb6 = cfg.getNode(6);
+        Edge e36 = new Edge(bb3,bb6);
+        HashMap<String,String> vars36 = new HashMap<>();
+        vars36.put("b","10");
+        vars36.put("a","15");
+        vars36.put("z","3");
+
+        assertEquals("a should have Bottom",variables.get(e01),vars01);
+        assertEquals("b should have 10",variables.get(e12),vars12);
+        assertEquals("z should have 7",variables.get(e36),vars36);
     }
 }

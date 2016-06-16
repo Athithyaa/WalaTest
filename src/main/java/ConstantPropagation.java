@@ -77,7 +77,18 @@ public class ConstantPropagation {
             }else if(val2.equals("Top")){
                 valNew = "Top";
             }else{
-                valNew = "Top";
+                double dval1,dval2;
+                try{
+                    dval1 = Double.parseDouble(val1);
+                    dval2 = Double.parseDouble(val2);
+                    if(dval1==dval2){
+                        valNew = Double.toString(dval1);
+                    }else{
+                        valNew = "Top";
+                    }
+                }catch (Exception ex){
+                    valNew = "Top";
+                }
             }
             union.put(s,valNew);
         }
@@ -85,9 +96,12 @@ public class ConstantPropagation {
         return union;
     }
 
-    public ShrikeCFG.BasicBlock[] evaluate(ShrikeCFG.BasicBlock next,HashMap<String,String> variables){
+    public boolean evaluate(Edge edge,HashMap<String,String> variables){
         try {
+            // getInstructionSet
             IInstruction[] instrSet = cfg.getInstructions();
+            // get SourceBlock from the edge
+            ShrikeCFG.BasicBlock next = edge.getSource();
 
             for (int i = next.getFirstInstructionIndex(); i <= next.getLastInstructionIndex(); i++) {
                 //System.out.println(i + " " + instrSet[i].toString());
@@ -134,7 +148,7 @@ public class ConstantPropagation {
                     }
 
                     BinaryOpInstruction binInstr = (BinaryOpInstruction)instrSet[i];
-                    String storeName = extractVarName(instrSet[i+1],i);
+                    String storeName = extractVarName(instrSet[i+1],i+1);
 
                     if((variables.get(strVal1)!=null &&
                             variables.get(strVal1).equals("Top"))||
@@ -195,91 +209,173 @@ public class ConstantPropagation {
                         }
                     }
 
-                    if(condFlag!=1) {
-                        ConditionalBranchInstruction condInstr = (ConditionalBranchInstruction)instrSet[i];
+                    ConditionalBranchInstruction condInstr = (ConditionalBranchInstruction)instrSet[i];
 
-                        double val1;
+                    double val1=0;
+                    double val2=0;
+                    int flag=0;
+
+                    if(condFlag!=1) {
                         try {
                             val1 = Double.parseDouble(strVal1);
-                        }catch (Exception ex){
+                        } catch (Exception ex) {
                             val1 = Double.parseDouble(variables.get(strVal1));
                         }
 
-                        double val2;
+
                         try {
-                            val2=Double.parseDouble(strVal2);
-                        }catch (Exception ex){
-                            val2=Double.parseDouble(variables.get(strVal2));
+                            val2 = Double.parseDouble(strVal2);
+                        } catch (Exception ex) {
+                            val2 = Double.parseDouble(variables.get(strVal2));
                         }
-
-                        int flag=0;
-                        ShrikeCFG.BasicBlock[] bbList = new ShrikeCFG.BasicBlock[1];
-                        if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.NE)) {
-                            if(val2!=val1){
-                                flag=1;
-                            }
-                        } else if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.EQ)) {
-                            if(val2==val1){
-                                flag=1;
-                            }
-                        } else if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.GE)) {
-                            if(val2>=val1){
-                                flag=1;
-                            }
-                        } else if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.GT)) {
-                            if(val2>val1){
-                                flag=1;
-                            }
-                        } else if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.LE)) {
-                            if(val2<=val1){
-                                flag=1;
-                            }
-                        } else if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.LT)) {
-                            if(val2<val1){
-                                flag=1;
-                            }
-                        }
-
-                        if(flag==1){
-                            bbList[0] = cfg.getBlockForInstruction(condInstr.getTarget());
-                        }else{
-                            bbList[0] = cfg.getBlockForInstruction(i+1);
-                        }
-
-                        return bbList;
-                    }else{
-                        int ctr = 0;
-                        ShrikeCFG.BasicBlock[] bbList = new ShrikeCFG.BasicBlock[cfg.getSuccNodeCount(next)];
-                        Iterator<ShrikeCFG.BasicBlock> it = cfg.getSuccNodes(next);
-                        while(it.hasNext()){
-                            bbList[ctr] = it.next();
-                            ctr++;
-                        }
-                        return bbList;
                     }
+
+
+                    if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.NE)) {
+                        if(edge.getDestination().equals(cfg.getBlockForInstruction(condInstr.getTarget()))) {
+                            if (condFlag != 1 && val2 != val1) {
+                                flag = 1;
+                            } else if(condFlag ==1){
+                                flag = 1;
+                            }
+                        }else{
+                            if (condFlag != 1 && val2 == val1) {
+                                flag = 1;
+                            } else if(condFlag ==1){
+                                flag = 1;
+                                try{
+                                    Double.parseDouble(strVal1);
+                                    try{
+                                        Double.parseDouble(strVal2);
+                                    }catch (Exception ex){
+                                        variables.put(strVal2,strVal1);
+                                    }
+                                }catch (Exception ex){
+                                    try{
+                                        Double.parseDouble(strVal2);
+                                        variables.put(strVal1,strVal2);
+                                    }catch (Exception ex1){
+                                        if(variables.get(strVal2)!=null){
+                                            variables.put(strVal1,variables.get(strVal2));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.EQ)) {
+                        if(edge.getDestination().equals(cfg.getBlockForInstruction(condInstr.getTarget()))) {
+                            if (condFlag != 1 && val2 == val1) {
+                                flag = 1;
+                                try{
+                                    Double.parseDouble(strVal1);
+                                    try{
+                                        Double.parseDouble(strVal2);
+                                    }catch (Exception ex){
+                                        variables.put(strVal2,strVal1);
+                                    }
+                                }catch (Exception ex){
+                                    try{
+                                        Double.parseDouble(strVal2);
+                                        variables.put(strVal1,strVal2);
+                                    }catch (Exception ex1){
+                                        if(variables.get(strVal2)!=null){
+                                            variables.put(strVal1,variables.get(strVal2));
+                                        }
+                                    }
+                                }
+                            } else if(condFlag ==1){
+                                flag = 1;
+                            }
+                        }else{
+                            if (condFlag != 1 && val2 != val1) {
+                                flag = 1;
+                            } else if(condFlag ==1){
+                                flag = 1;
+                            }
+                        }
+
+                    } else if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.GE)) {
+                        if(edge.getDestination().equals(cfg.getBlockForInstruction(condInstr.getTarget()))) {
+                            if( condFlag!=1 && val2>=val1){
+                                flag=1;
+                            }else if(condFlag==1){
+                                flag=1;
+                            }
+                        }else{
+                            if( condFlag!=1 && val2<val1){
+                                flag=1;
+                            }else if(condFlag==1){
+                                flag=1;
+                            }
+                        }
+                    } else if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.GT)) {
+                        if(edge.getDestination().equals(cfg.getBlockForInstruction(condInstr.getTarget()))) {
+                            if( condFlag!=1 && val2>val1){
+                                flag=1;
+                            }else if(condFlag==1){
+                                flag=1;
+                            }
+                        }else{
+                            if( condFlag!=1 && val2<=val1){
+                                flag=1;
+                            }else if(condFlag==1){
+                                flag=1;
+                            }
+                        }
+                    } else if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.LE)) {
+                        if(edge.getDestination().equals(cfg.getBlockForInstruction(condInstr.getTarget()))) {
+                            if( condFlag!=1 && val2<=val1){
+                                flag=1;
+                            }else if(condFlag==1){
+                                flag=1;
+                            }
+                        }else{
+                            if( condFlag!=1 && val2>val1){
+                                flag=1;
+                            }else if(condFlag==1){
+                                flag=1;
+                            }
+                        }
+                    } else if (condInstr.getOperator().equals(IConditionalBranchInstruction.Operator.LT)) {
+                        if(edge.getDestination().equals(cfg.getBlockForInstruction(condInstr.getTarget()))) {
+                            if( condFlag!=1 && val2<val1){
+                                flag=1;
+                            }else if(condFlag==1){
+                                flag=1;
+                            }
+                        }else{
+                            if( condFlag!=1 && val2>=val1){
+                                flag=1;
+                            }else if(condFlag==1){
+                                flag=1;
+                            }
+                        }
+                    }
+                    return flag==1;
                 }
             }
-            int ctr = 0;
-            ShrikeCFG.BasicBlock[] bbList = new ShrikeCFG.BasicBlock[cfg.getSuccNodeCount(next)];
-            Iterator<ShrikeCFG.BasicBlock> it = cfg.getSuccNodes(next);
-            while(it.hasNext()){
-                bbList[ctr] = it.next();
-                ctr++;
-            }
-            return bbList;
+            return true;
         }catch (Exception ex){
             ex.printStackTrace();
         }
-        return null;
+        return false;
     }
 
-    public HashMap<String,String> propagate(){
+    public HashMap<Edge,HashMap<String,String>> propagate(){
+
+        // variables map
         HashMap<String,String> variables = new HashMap<>();
 
+        // variable for entry block
         ShrikeCFG.BasicBlock firstBB = cfg.entry();
+
+        // queue for traversing the control flow graph
         Queue<ShrikeCFG.BasicBlock> bbQueue = new LinkedList<>();
-        HashMap<ShrikeCFG.BasicBlock,HashMap<String,String>> bVarMap = new HashMap<>();
-        HashMap<ShrikeCFG.BasicBlock,List<ShrikeCFG.BasicBlock>> edgeExclMap = new HashMap<>();
+
+        // variable to manage statements and variables associated with it
+        EdgeManager edgeManager = new EdgeManager();
+
+        // variable to check for exit condition
         HashMap<String,String> dupCheck=null;
 
         bbQueue.add(firstBB);
@@ -287,27 +383,21 @@ public class ConstantPropagation {
         while(!bbQueue.isEmpty()) {
             ShrikeCFG.BasicBlock bbItem = bbQueue.remove();
 
-            Iterator<ShrikeCFG.BasicBlock> itr = cfg.getPredNodes(bbItem);
+            Iterator<ShrikeCFG.BasicBlock> itrPred = cfg.getPredNodes(bbItem);
             int predNodeCnt = cfg.getPredNodeCount(bbItem);
             HashMap<String,String>[] varList = new HashMap[predNodeCnt];
             int predCntr = 0;
 
-            while(itr.hasNext()) {
-                ShrikeCFG.BasicBlock itrb = itr.next();
-                if(bVarMap.get(itrb) != null) {
-                    if(edgeExclMap.get(itrb)!=null) {
-                        if(!edgeExclMap.get(itrb).contains(bbItem)) {
-                            varList[predCntr] = new HashMap<>();
-                            varList[predCntr].putAll(bVarMap.get(itrb));
-                            predCntr++;
-                        }
-                    }else{
+            while(itrPred.hasNext()) {
+                ShrikeCFG.BasicBlock itrb = itrPred.next();
+                Edge e = new Edge(itrb,bbItem);
+                if(edgeManager.getEdge(e) != null) {
+                    if(!edgeManager.isExcluded(e)) {
                         varList[predCntr] = new HashMap<>();
-                        varList[predCntr].putAll(bVarMap.get(itrb));
+                        varList[predCntr].putAll(edgeManager.getEdge(e));
                         predCntr++;
                     }
                 }
-
             }
 
             if(predCntr!=predNodeCnt){
@@ -320,28 +410,26 @@ public class ConstantPropagation {
                 variables.putAll(perfomUnion(varList));
             }
 
-            ShrikeCFG.BasicBlock[] succBBs = evaluate(bbItem, variables);
-            HashMap<String,String> v = new HashMap<>();
-            v.putAll(variables);
-            bVarMap.put(bbItem, v);
+            List<Edge> succEdgeList = new ArrayList<>();
+            Iterator<ShrikeCFG.BasicBlock> itrSucc = cfg.getSuccNodes(bbItem);
 
-            if(succBBs.length < cfg.getSuccNodeCount(bbItem)){
-                Iterator<ShrikeCFG.BasicBlock> itrSucc = cfg.getSuccNodes(bbItem);
-                Set<ShrikeCFG.BasicBlock> succSet = new LinkedHashSet<>();
+            while(itrSucc.hasNext()){
+                edgeManager.clearExclusionList();
+                HashMap<String,String> varResult  = new HashMap<>();
+                varResult.putAll(variables);
 
-                while(itrSucc.hasNext()){
-                    succSet.add(itrSucc.next());
+                Edge e = new Edge(bbItem,itrSucc.next());
+                boolean evaluated = evaluate(e,varResult);
+
+                if(evaluated) {
+                    succEdgeList.add(e);
+                    edgeManager.putEdge(e, varResult);
+                }else{
+                    edgeManager.addExcludedEdge(e);
                 }
 
-                for(ShrikeCFG.BasicBlock b: succBBs){
-                    succSet.remove(b);
-                }
-                if(!succSet.isEmpty()){
-                    for(ShrikeCFG.BasicBlock b : succSet){
-                        List<ShrikeCFG.BasicBlock> adjList = new ArrayList<>();
-                        adjList.add(b);
-                        edgeExclMap.put(bbItem,adjList);
-                    }
+                if(cfg.getSuccNodeCount(bbItem)==1){
+                    variables.putAll(varResult);
                 }
             }
 
@@ -359,14 +447,15 @@ public class ConstantPropagation {
                 }
             }
 
-            for(ShrikeCFG.BasicBlock bb : succBBs){
-                if(!bbQueue.contains(bb)){
-                    bbQueue.add(bb);
+            for(Edge e : succEdgeList){
+                ShrikeCFG.BasicBlock dest = e.getDestination();
+                if(!bbQueue.contains(dest)){
+                    bbQueue.add(dest);
                 }
             }
         }
         //System.out.println("Variables map:" + variables.toString());
-        return variables;
+        return edgeManager.getEdgeVarMap();
     }
 
     public ShrikeCFG getCfg() {
