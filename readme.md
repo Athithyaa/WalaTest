@@ -84,14 +84,15 @@ The SampleProgram.jar contains the following classes:
     }
  ~~~~
 3. Sample run the program gives the following output:
-
-*Variables after propagation: {b=10, a=15, z=3}*
-meaning that at the end of method *fun*, "a" has value "15", "b" has value "10" and "z" has value "3". 
-
-
+~~~~
+{\[BB 0 ---> BB 1\]={}, \[BB 1 ---> BB 2\]={b=10, a=5, z=7}, \[BB 6 ---> BB 7\]={b=10, a=15, z=3}, \[BB 3 ---> BB 6\]={b=10, a=15, z=3}, \[BB 2 ---> BB 3\]={b=10, a=10, z=1}}
+~~~~
+  The output represent a edge variable map. Each edge in the control flow graph is mapped to a variable set which signifies the propagated constant after the source block in \[Source ---> Destination\].
+  
+  
 ## TO:DO:
 
 1. Program only works for fairly simple conditional constructs (simple if statements).
-2. Loops have not been handled.
+2. Loops work will limited flexibility
 3. Conditional statements with complicated expressions have not been handled.
 4. Instruction evaluation is not exhaustive.
