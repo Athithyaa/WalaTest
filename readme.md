@@ -93,6 +93,6 @@ The SampleProgram.jar contains the following classes:
 ## TO:DO:
 
 1. Program only works for fairly simple conditional constructs (simple if statements).
-2. Loops work will limited flexibility
+2. Loops work with limited flexibility
 3. Conditional statements with complicated expressions have not been handled.
 4. Instruction evaluation is not exhaustive.
