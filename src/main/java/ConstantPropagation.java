@@ -266,6 +266,8 @@ public class ConstantPropagation {
                         if(edge.getDestination().equals(cfg.getBlockForInstruction(condInstr.getTarget()))) {
                             if (condFlag != 1 && val2 == val1) {
                                 flag = 1;
+                            } else if(condFlag ==1){
+                                flag = 1;
                                 try{
                                     Double.parseDouble(strVal1);
                                     try{
@@ -283,8 +285,6 @@ public class ConstantPropagation {
                                         }
                                     }
                                 }
-                            } else if(condFlag ==1){
-                                flag = 1;
                             }
                         }else{
                             if (condFlag != 1 && val2 != val1) {
@@ -414,7 +414,6 @@ public class ConstantPropagation {
             Iterator<ShrikeCFG.BasicBlock> itrSucc = cfg.getSuccNodes(bbItem);
 
             while(itrSucc.hasNext()){
-                edgeManager.clearExclusionList();
                 HashMap<String,String> varResult  = new HashMap<>();
                 varResult.putAll(variables);
 
@@ -435,6 +434,7 @@ public class ConstantPropagation {
 
 
             if(bbItem.isExitBlock()){
+                edgeManager.clearExclusionList();
                 if(dupCheck==null){
                     dupCheck = new HashMap<>();
                     dupCheck.putAll(variables);
