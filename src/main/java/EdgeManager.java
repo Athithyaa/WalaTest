@@ -1,3 +1,5 @@
+import com.ibm.wala.cfg.ShrikeCFG;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,6 +33,20 @@ public class EdgeManager {
     public boolean isExcluded(Edge e){
         return exclusionList.contains(e);
     }
+
+    public boolean isBlockExcluded(ShrikeCFG.BasicBlock bb, ShrikeCFG cfg){
+        if(bb.isEntryBlock()) {
+            return false;
+        }
+        int exclCount = cfg.getPredNodeCount(bb);
+        for(Edge e : exclusionList){
+            if(e.getDestination().equals(bb)){
+                exclCount -= 1;
+            }
+        }
+        return exclCount == 0;
+    }
+
 
     public void clearExclusionList(){
         exclusionList.clear();

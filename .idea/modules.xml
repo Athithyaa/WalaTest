@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/WalaTest.iml" filepath="$PROJECT_DIR$/WalaTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/walatest.iml" filepath="$PROJECT_DIR$/.idea/modules/walatest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/walatest-build.iml" filepath="$PROJECT_DIR$/.idea/modules/walatest-build.iml" />
     </modules>
   </component>
 </project>
