@@ -10,8 +10,13 @@ import scala.collection.mutable.ListBuffer
 /**
   * Created by Athithyaa on 18-06-2016.
   */
+//TO:DO change all string based lattice variables to case class
+case class lat(varType: String)
+
 object ConstantPropScala {
-  val cfg = new ConstantPropagation("SampleProgram.jar","Program.fun2()V",true).getCfg
+  val cfg = new ConstantPropagation("SampleProgram.jar","Program.fun(I)V",true).getCfg
+  val top = lat("Top")
+  val bottom = lat("Bottom")
 
   @throws[Exception]
   def extractVarOrConstant(instr: IInstruction, instrIndex: Int): String = {
