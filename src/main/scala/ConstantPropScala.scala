@@ -13,10 +13,15 @@ import scala.collection.mutable.ListBuffer
 //TO:DO change all string based lattice variables to case class
 case class lat(varType: String)
 
-object ConstantPropScala {
-  val cfg = new ConstantPropagation("SampleProgram.jar","Program.fun(I)V",true).getCfg
+class ConstantPropScala(jarFile:String,methodSig:String,viz:Boolean) {
+
+  var cfg : ShrikeCFG = new ConstantPropagation(jarFile,methodSig,viz).getCfg
   val top = lat("Top")
   val bottom = lat("Bottom")
+
+  def this() {
+    this("SampleProgram.jar","Program.fun(I)V",true)
+  }
 
   @throws[Exception]
   def extractVarOrConstant(instr: IInstruction, instrIndex: Int): String = {
@@ -63,7 +68,7 @@ object ConstantPropScala {
         case bOp: BinaryOpInstruction =>{
           val constOrVar1 = extractVarOrConstant(instrSet(i-1),i)
           val constOrVar2 = extractVarOrConstant(instrSet(i-2),i)
-          val pattern = "/[0-9]*\\.?[0-9]*/g".r
+          val pattern = "(\\d*\\.?\\d*)".r
           var numb1 : String = ""
           var numb2 : String = ""
           val storeName = extractVarOrConstant(instrSet(i+1),i+1)
@@ -89,7 +94,7 @@ object ConstantPropScala {
               }
             }
           }
-          if(numb1.compareTo("Top")==0 || numb1.compareTo("Top")==0){
+          if(numb1.compareTo("Top")==0 || numb2.compareTo("Top")==0){
             varMap.put(storeName, "Top")
           } else {
             bOp.getOperator match {
@@ -155,7 +160,7 @@ object ConstantPropScala {
                     }
                   }else{
                     if(pattern.findAllIn(constOrVar2).next()==null){
-                      varMap.put(constOrVar2,constOrVar2)
+                      varMap.put(constOrVar2,constOrVar1)
                     }
                   }
                   execFlag = 1
@@ -251,15 +256,15 @@ object ConstantPropScala {
                 if (condFlag != 1 && numb1.toDouble == numb2.toDouble) {
                   execFlag = 1
                 } else if (condFlag == 1) {
-                  if(pattern.findAllIn(constOrVar1).next()==null){
-                    if(pattern.findAllIn(constOrVar2).next()==null){
+                  if(pattern.findAllIn(constOrVar1).next().length==0){
+                    if(pattern.findAllIn(constOrVar2).next().length==0){
                       varMap.put(constOrVar2,varMap.get(constOrVar1))
                     }else{
                       varMap.put(constOrVar1,constOrVar2)
                     }
                   }else{
-                    if(pattern.findAllIn(constOrVar2).next()==null){
-                      varMap.put(constOrVar2,constOrVar2)
+                    if(pattern.findAllIn(constOrVar2).next().length==0){
+                      varMap.put(constOrVar2,constOrVar1)
                     }
                   }
                   execFlag = 1
@@ -409,17 +414,13 @@ object ConstantPropScala {
               edgeManager.addExcludedEdge(edge1)
             }
           }
-          if (src.isExitBlock) {
+          if (src.getNumber.equals(cfg.getNumberOfNodes-2)) {
             edgeManager.clearExclusionList()
           }
         }
       })
     }
-    edgeManager.getEdgeVarMap()
-  }
-
-  def main(args: Array[String]) {
-    println(propagate())
+    edgeManager.getEdgeVarMap
   }
 
 }
