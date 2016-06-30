@@ -20,15 +20,17 @@ class ConstantPropScalaTest extends FlatSpec{
         return "Integer"
       }
     }
-    val result = ConstantPropScala.extractVarOrConstant(testConstInstr,0)
+    val cp = new ConstantPropScala
+    val result = cp.extractVarOrConstant(testConstInstr,0)
     assert(result==="3")
-    val instrSet = ConstantPropScala.cfg.getInstructions
+    val instrSet = cp.cfg.getInstructions
     val testVarInstr = instrSet(1)
-    val result1 = ConstantPropScala.extractVarOrConstant(testVarInstr,1)
+    val result1 = cp.extractVarOrConstant(testVarInstr,1)
     assert(result1==="a")
   }
 
   it should "otherwise throw an exception" in {
+    val cp = new ConstantPropScala
     val sampleInstr = new IInstruction {
       override def getPushedType(poppedTypesToCheck: Array[String]): String = ???
 
@@ -47,7 +49,7 @@ class ConstantPropScalaTest extends FlatSpec{
       override def redirectTargets(targetMap: Array[Int]): IInstruction = ???
     }
     intercept[Exception] {
-      ConstantPropScala.extractVarOrConstant(sampleInstr, 0)
+      cp.extractVarOrConstant(sampleInstr, 0)
     }
 
 
