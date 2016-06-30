@@ -152,14 +152,14 @@ class ConstantPropScala(jarFile:String,methodSig:String,viz:Boolean) {
                 if (condFlag != 1 && numb2.toDouble == numb1.toDouble){
                   execFlag = 1
                 } else if(condFlag == 1){
-                  if(pattern.findAllIn(constOrVar1).next()==null){
-                    if(pattern.findAllIn(constOrVar2).next()==null){
+                  if(pattern.findAllIn(constOrVar1).next().length==0){
+                    if(pattern.findAllIn(constOrVar2).next().length==0){
                       varMap.put(constOrVar2,varMap.get(constOrVar1))
                     }else{
                       varMap.put(constOrVar1,constOrVar2)
                     }
                   }else{
-                    if(pattern.findAllIn(constOrVar2).next()==null){
+                    if(pattern.findAllIn(constOrVar2).next().length==0){
                       varMap.put(constOrVar2,constOrVar1)
                     }
                   }
