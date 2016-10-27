@@ -5,4 +5,4 @@ before_install:
 script: sbt clean test
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - bash <(curl -s https://codecov.io/bash) -t b4d56d67-3919-41f6-b960-cc85ddd2acd1
